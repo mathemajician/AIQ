@@ -56,6 +56,13 @@ Outline of files and directories:
 ---------------------------------
 
 
+Conf Paper Settings.ods
+
+This spreadsheet file (in open document format, open with OpenOffice
+or LibreOffice) contains the settings used to obtain the results in
+the AIQ conference paper.
+
+
 AIQ.py 
 
 This is the main program to use to compute an agent's AIQ value for a
