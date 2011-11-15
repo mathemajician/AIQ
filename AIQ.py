@@ -6,7 +6,7 @@
 #
 # Copyright Shane Legg 2011
 # Released under the GNU GPLv3
-
+#
 
 from refmachines import *
 from agents import *
@@ -19,12 +19,12 @@ from multiprocessing import Pool
 import getopt, sys
 
 
-# Run an agent in an environment for a while and compute the total discounted reward
-
+# Test an agent by performing both positive and negative reward runs in order
+# to get antithetic variance reduction. 
 def test_agent( refm_call, a_call, episode_length, disc_rate, stratum, program ):
 
-    # run twice with flipped reward second time for antithetic variables
-    s1, r1 = _test_agent(refm_call, a_call, 1.0, episode_length,\
+    # run twice with flipped reward second time
+    s1, r1 = _test_agent(refm_call, a_call,  1.0, episode_length,\
                          disc_rate, stratum, program)
     s2, r2 = _test_agent(refm_call, a_call, -1.0, episode_length, \
                          disc_rate, stratum, program)
@@ -38,70 +38,50 @@ def test_agent( refm_call, a_call, episode_length, disc_rate, stratum, program )
     return (s1,r1,r2)
 
 
+# Perform a single run of an agent in an enviornment and collect the results
 def _test_agent( refm_call, agent_call, rflip, episode_length, \
                  disc_rate, stratum, program ):
-
-    #print
-    #print "Start episode"
-    #print
 
     # create reference machine
     refm = eval( refm_call )
 
     # create agent
     agent = eval( agent_call )
-
     agent.reset()
 
     disc_reward = 0.0
     discount    = 1.0
 
-    #print program
-    #print
-
     reward, observations = refm.reset( program )
 
     for i in range( episode_length ):
-
-        #print observations, rflip*reward
         action = agent.perceive( observations, rflip*reward )
-        #print action,
         reward, observations, steps = refm.act( action )
 
         # we signal failure with a NaN so as not to upset
         # the parallel map running this with an exception
-        if steps == refm.max_steps:
-            return (stratum,float('nan'))
+        if steps == refm.max_steps: return (stratum,float('nan'))
 
         disc_reward += discount*rflip*reward
         discount    *= disc_rate
 
-    # normalise (and thus correct for missing tail)
+    # if discounting normalise (and thus correct for missing tail)
     if disc_rate != 1.0:
         disc_reward /= ( (1.0-disc_rate**(episode_length+1))/(1.0-disc_rate) )
     else:
+	    # otherwise just normalise by the episode length
         disc_reward /= episode_length
 
-    #print agent.Q_value
-
-    # dispose of agent
+    # dispose of agent and reference machine
     agent = None
-
-    # dispose of reference machine
-    refm = None
+    refm  = None
     
-    #print
-    #print
-    #print "End episode"
-    #print
-
     return stratum, disc_reward
 
 
 
-# Simple MC estimator, useful for sanity checking more complex estimators
-# It doesn't do logging as the log file assumes dual runs for antithetic variables
-
+# Simple MC estimator, useful for checking the more complex adaptive estimator.
+# It doesn't do logging as the log file assumes dual runs for antithetic variables.
 def simple_mc_estimator( refm_call, agent_call, episode_length, disc_rate, \
                          sample_size ):
 
@@ -124,12 +104,10 @@ def simple_mc_estimator( refm_call, agent_call, episode_length, disc_rate, \
 
 # Adaptive stratified estimator
 #
-# All the following parameter names are from the paper:
+# The following parameter names are from the paper that describes the algorithm:
 #
 # N total number of samples taken in each step (i.e. across all strata)
 # p probability of being in a stratum
-# optimal = whether to use optimal or proportional sampling
-
 def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samples, \
                           sample_size, dist, threads ):
 
@@ -139,7 +117,8 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
 
     # With N below I keep the steps small to start with to force the system
     # sample a reasonable number of each to get better variabilty estimates
-    # before starting to adpat (after 10*I)
+    # before starting to adpat more.  It would be nice to have a fully online
+    # version without these steps.
     N = [0, 3*A, 6*A, 10*A, \
          20*A, 30*A, 50*A, 70*A, 100*A, 250*A, 500*A, 750*A, 1000*A, \
          1250*A, 1500*A, 1750*A, 2000*A, 2500*A, 3000*A, 3500*A, 4000*A, 5000*A]
@@ -155,16 +134,14 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
     print "Sample size steps:"
     print N
     
-    K = len(N)                 # number of algorithm steps
+    K = len(N)                 # number of adaptive stratification stages
     Y = [[] for i in range(I)] # empty collection of samples divided up by stratum
     Y[0] = [0]
-    s = ones((K,I))          # estimated standard deviations for each stage & strata
-    n = zeros((K,I))         # for each step the size of each stratum
-    
-    est = zeros((K))
+    s = ones((K,I))            # estimated standard deviations for each stage & strata
+    n = zeros((K,I))           # for each step the size of each stratum
+    est = zeros((K))           # estimated confidence intervals
 
     for k in range( 1, K ):
-
         print
 
         # compute the allocations with "method a" from the paper,
@@ -184,12 +161,10 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
 
         # make sure each non-zero probability stratum gets sampled at least twice
         M = x + 2.0*ceil(p)
-
-        print sum(M)
-
+        
         # create parallel computation pool
         if threads == 0:
-            pool = Pool() # default threads == core count
+            pool = Pool() # default threads = core count
         else:
             pool = Pool(threads)
         results = []
@@ -203,7 +178,6 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
                     sys.exit()
 
                 program = samples[i].pop(0)
-                print "Len ", len(program)
                 args = (refm_call, agent_call, episode_length, disc_rate, i, program)
                 result = pool.apply_async( test_agent, args )
                 results.append( result )
@@ -222,6 +196,7 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
                 
                 if isnan(perf1) or isnan(perf2):
                     # run failed so get a new sample and add to processing pool
+                    #print "Adding extra sample to the pool due to run failure"
                     if len(samples[stratum]) == 0:
                         print "Error: Run out of program samples in stratum: " \
                               + str(stratum)
@@ -237,6 +212,7 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
 
         pool.close()
         pool.join()
+
 
         # compute new total program sample counts for each strata
         n[k] = n[k-1] + M
@@ -262,10 +238,10 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
         for i in range(1,I):
             print " % 3d % 4d % 5d" % (i, int(M[i]), n[k][i] ),
 
-            if n[k][i] == 0:
+            if n[k][i] == 0: 
                 # no samples, so skip mean and half CI
                 print
-            elif n[k][i] < 4:
+            elif n[k][i] < 4: 
                 # don't report half CI with less than 4 program samples
                 print " % 6.1f" % (array(Y[i]).mean() )
             else:
@@ -281,6 +257,7 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
 
         delta = 1.96 * sum( p*s[k] ) / sqrt( N[k] )
         
+        # wait until after 3rd stage due to unreliable early statistics
         if k >= min(3,K-1):
             print "\n         %6i   % 5.1f +/- % 5.1f " % (N[k], est[k-1], delta )
         
@@ -289,7 +266,6 @@ def stratified_estimator( refm_call, agent_call, episode_length, disc_rate, samp
 
 
 # load the pre-sampled programs
-
 sample_data = None
 
 def load_samples( refm, cluster_node, simple_mc ):
@@ -333,7 +309,6 @@ def load_samples( refm, cluster_node, simple_mc ):
 
 
 # print basic usage
-
 def usage():
     print "python AIQ -r reference_machine[,param1[,param2[...]]] " \
         + "-a agent[,param1[,agent_param2[...]]] " \
@@ -342,7 +317,6 @@ def usage():
 
 
 # main function that just sets things up and then calls the sampler
-
 logging  = False
 log_file = None
 
@@ -351,7 +325,7 @@ def main():
     global logging, log_file
 
     print
-    print "AIQ version 0.9"
+    print "AIQ version 1.0"
     print
 
     # get the command line arguments
@@ -468,7 +442,7 @@ def main():
     if sample_size == None:
         sample_size = len(sample_data)
         
-    # The following is a crute check as we can still run out of samples in a
+    # The following is a crude check as we can still run out of samples in a
     # stratum depending on how the adaptive stratification decides to sample.
     if sample_size > 2.0 * len(sample_data):
         print

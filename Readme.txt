@@ -6,15 +6,49 @@ AIQ README
 
 For the theory behind this see:
 
-Algorithm Intelligence Quotient: A practial measure of machine intelligence
-by Shane Legg and Joel Veness
+Algorithmic Intelligence Quotient: A practical measure of machine intelligence
+by Shane Legg and Joel Veness, 2001
 
 and for the theory behind that see:
 
 Universal Intelligence: A formal definition of machine intelligence
-by Shane Legg and Marcus Hutter
+by Shane Legg and Marcus Hutter, 2007
 
 The code is released under the GNU GPLv3.  See Licence.txt file.
+
+
+Known issues
+------------
+
+Sometimes a stage in the adaptive sampler completes with a test missing,
+or even with an additional test run, according to the log files.  It 
+seems to happen about once every 10,000 trials, based on previous
+experience.  It might be a numerical bug in the way in which the true
+adaptive strata targets (which are floats) are converted into integers.
+It might even be OS dependent.  I just spent an hour running it on a
+Mac and couldn't replicate this bug again.  Anyway, it's not really going
+to change anything.  Any new adaptive stratification allocation rounds
+will correct for it, plus it's only something like 1 sample out of 10k
+samples so any effect should be very small compared to the general
+variability in the estimates.  If anybody does track it down, let me
+know and I'll fix the code.
+
+Be careful when looking at results from the ComputeFromLog.py program
+if the log file in questions is still being computed.  The reason is
+that the samples tends to run through the strata in order during each
+stage and thus there can be some autocorrelation in the results due
+to different strata having different mean values.  So either you should
+really wait until the end of a stage for the results to be sensible.
+In AIQ.py the results only appear at the end of stages so this isn't
+an issue.
+
+The CI estimates when the name of samples is low seems to be too low.
+We have checked the equations and everything is as it should be in
+the paper.  Furthermore, as the number of samples increase past 1000
+or so, our empirical tests indicate that the CI's are indeed accurate.
+Maybe it's a bug in the paper where this sampler is described?  We
+don't know.  In any case, do wait for 1000 samples before you place
+too much confidence in the estimated CI figures.
 
 
 
@@ -44,10 +78,10 @@ Arguments:
  files and which sample file to read (need to think about latter
  aspect, maybe change).
 
--t threads_to_use Default is the number of cores on the machine.  But
- for a multiple threaded agent you might want to set it to be less
+-t threads_to_use Default is the number of cores on the machine.
+   For a multi threaded agent you might want to set it to be less.
 
---log  Swtich on output logging
+--log  Switch on output logging
 
 --simple_mc Use a simple MC sample rather than the stratified sampler.
   Useful for sanity checks and also debugging as it doesn't do any
@@ -56,7 +90,7 @@ Arguments:
 
 An example run of AIQ would be:
 
-python AIQ.py -r BF,3 -d 0.999 -a Q_l,50.0,0.5,0.5,0.05
+python AIQ.py -r BF -a Q_l,50.0,0.5,0.5,0.05,0.9  -l 1000 -s 1000
 
 which is a BF reference machine with a 3 symbol tape, discounting of
 0.999 (which implies an episode length of 2994 -- it tells you this)
@@ -74,10 +108,10 @@ for each strata.  At the moment you can't combined logs simply because
 the first line is the program sample distribution information (needed
 to work out the stratified estimate of the AIQ value).
 
-Maybe at some point I'll let the program accept multiple log files as
-input.  You could simply strip the first line of all logs except the
-first one and then concatenate them for now.
+You can provide it with multiple file names, e.g. with a *, but they
+are all computed individually.
 
+The --full option reports also the strata statistics.
 
 
 /log
@@ -110,7 +144,7 @@ HLQ_l.py  Like Q learning but with an automatic learning rate.
 
 MC_AIXI.py Wrapper for Monte Carlo AIXI agent.  Must have an
 executable call mc-aixi in this directory in order to run.  C++ code
-for MC AIXI can be downloaded from the internet.
+for MC-AIXI can be downloaded from the internet.
 
 
 

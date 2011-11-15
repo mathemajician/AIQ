@@ -6,6 +6,7 @@
 #
 # Copyright Shane Legg 2011
 # Released under GNU GPLv3
+#
 
 from scipy import zeros
 from scipy import exp

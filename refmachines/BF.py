@@ -22,8 +22,8 @@ INSTRUCTIONS = ['<','>','+','-',',','.','[',']','#', '%' ]
 class BF(ReferenceMachine):
 
 
-    # create a new BF reference machine, default to a tape with 3 symbols
-    def __init__( self, num_symbols=3, obs_cells=1, reverse_output=0 ):
+    # create a new BF reference machine, default to a tape with 5 symbols
+    def __init__( self, num_symbols=5, obs_cells=1, reverse_output=0 ):
 
         self.num_symbols  = int(num_symbols)
         self.obs_cells    = int(obs_cells)

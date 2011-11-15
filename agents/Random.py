@@ -3,7 +3,7 @@
 #
 # Copyright Shane Legg 2011
 # Released under GNU GPLv3
-
+#
 
 from random  import randint
 from Agent   import Agent

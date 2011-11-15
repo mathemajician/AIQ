@@ -90,13 +90,11 @@ def estimate( file, detailed ):
 
 
 # print basic usage
-
 def usage():
     print "python ComputeFromLog [--full] log_file_name [log_file_name ...]" 
 
 
 # main function that just sets things up and then calls the sampler
-
 logging  = False
 log_file = None
 
@@ -107,7 +105,7 @@ def main():
     detailed = False
 
     print
-    print "Compute AIQ from log file results, version 0.9"
+    print "Compute AIQ from log file results, version 1.0"
     print
 
     sys.argv.pop(0)
@@ -131,7 +129,6 @@ def main():
         if detailed: print
         file.close()
     
-
 
     
 if __name__ == "__main__":

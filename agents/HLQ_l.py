@@ -4,7 +4,7 @@
 #
 # Copyright Shane Legg 2011
 # Released under GNU GPLv3
-
+#
 
 from Agent import Agent
 
