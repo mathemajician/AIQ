@@ -97,14 +97,15 @@ Arguments:
 
 An example run of AIQ would be:
 
-python AIQ.py -r BF -a Q_l,50.0,0.5,0.5,0.05,0.9  -l 1000 -s 1000
+python AIQ.py -r BF -a Q_l,0.0,0.5,0.5,0.05,0.9  -l 1000 -s 1000
 
-which is a BF reference machine with a 3 symbol tape, discounting of
-0.999 (which implies an episode length of 2994 -- it tells you this)
-and Q lambda with parameters ....
+which is a BF reference machine with a 5 symbol tape (this is the
+default, you can specify other values), an episode length of 1000
+with no discounting, and Q lambda with parameters...
 
 If you want to try BF with, say, a 14 symbol tape, you'll first need
-to generate a program sample file for this (see below).
+to generate a program sample file for this (see below).  We only
+include our BF5 sample file in github to save space.
 
 
 
@@ -183,5 +184,5 @@ are named by the reference machine (including parameters) followed by
 what strata they are in, and AIQ also computes the estimated true
 strata probabilities based on this sample.  So make it reasonable
 large.  Say 100k programs for proper tests.  Use BF_sampler.py to
-generate these for the BF reference machine.
-
+generate these for the BF reference machine.  We include a sample
+file for a 5 symbol tape to get you started.
