@@ -6,8 +6,8 @@ AIQ README
 
 For the theory behind this see:
 
-Algorithmic Intelligence Quotient: A practical measure of machine intelligence
-by Shane Legg and Joel Veness, 2001
+An Approximation of the Universal Intelligence Measure
+by Shane Legg and Joel Veness, 2011
 
 and for the theory behind that see:
 
