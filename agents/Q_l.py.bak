@@ -6,10 +6,10 @@
 # Released under GNU GPLv3
 #
 
-from .Agent import Agent
+from Agent import Agent
 from numpy import zeros, ones
 import numpy as np
-from .random import randint, randrange, random
+from random import randint, randrange, random
 import sys
 
 
@@ -35,8 +35,8 @@ class Q_l(Agent):
             self.gamma = gamma
 
         if self.gamma >= 1.0:
-            print("Error: Q learning can only handle an internal discount rate ", \
-                  "that is below 1.0")
+            print "Error: Q learning can only handle an internal discount rate ", \
+                  "that is below 1.0"
             sys.exit()
             
         self.reset()

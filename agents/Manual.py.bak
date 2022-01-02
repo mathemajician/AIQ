@@ -6,10 +6,10 @@
 
 import sys
 
-from .random  import randint
-from .Agent   import Agent
+from random  import randint
+from Agent   import Agent
 
-from . import random
+import random
 
 MANUAL = 0
 RANDOM = 1
@@ -21,7 +21,7 @@ class Manual(Agent):
         Agent.__init__( self, refm, disc_rate )
 
         if self.num_actions > 10:
-            print("Error: Manual agent only handles 10 or less actions!")
+            print "Error: Manual agent only handles 10 or less actions!"
             sys.exit()
 
         self.mode = MANUAL
@@ -33,16 +33,16 @@ class Manual(Agent):
 
 
     def reset( self ):
-        print()
-        print("Reset!")
-        print()
+        print
+        print "Reset!"
+        print
 
 
     def perceive( self, obs, reward ):
-        print(" obs = " + str(obs) + " reward = " + str(reward ))
+        print " obs = " + str(obs) + " reward = " + str(reward )
 
         if self.mode == MANUAL:
-            choice = input(" action [0-" + str(self.num_actions-1) + "]  ")[0]
+            choice = raw_input(" action [0-" + str(self.num_actions-1) + "]  ")[0]
             if choice == "r":
                 self.mode = RANDOM
             elif choice == "s":

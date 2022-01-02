@@ -60,20 +60,20 @@ def estimate( file, detailed ):
     if detailed:
         for i in range(1,I):
             stratum_samples = len(Y[i])*2.0
-            print(" % 3d % 5d" % (i, stratum_samples ), end=' ')
+            print " % 3d % 5d" % (i, stratum_samples ),
 
             if stratum_samples == 0:
                 # no samples, so skip mean and half CI
-                print()
+                print
             elif stratum_samples < 4:
                 # don't report half CI with less than 4 samples
-                print(" % 6.1f" % (array(Y[i]).mean() ))
+                print " % 6.1f" % (array(Y[i]).mean() )
             else:
                 # do a full report
-                print(" % 6.1f +/- % 5.1f" \
-                   % (array(Y[i]).mean(), 1.96*s[i]/sqrt(stratum_samples) ))
+                print " % 6.1f +/- % 5.1f" \
+                   % (array(Y[i]).mean(), 1.96*s[i]/sqrt(stratum_samples) )
 
-        print()
+        print
 
     # compute the current estimate and 95% confidence interval
     est = 0.0
@@ -84,14 +84,14 @@ def estimate( file, detailed ):
 
     delta = 1.96 * sum(p*s) / sqrt(num_samples)
 
-    print("%6i  % 5.1f +/- % 5.1f" % (num_samples, est, delta ), end=' ')
+    print "%6i  % 5.1f +/- % 5.1f" % (num_samples, est, delta ),
 
     return
 
 
 # print basic usage
 def usage():
-    print("python ComputeFromLog [--full] log_file_name [log_file_name ...]") 
+    print "python ComputeFromLog [--full] log_file_name [log_file_name ...]" 
 
 
 # main function that just sets things up and then calls the sampler
@@ -104,9 +104,9 @@ def main():
 
     detailed = False
 
-    print()
-    print("Compute AIQ from log file results, version 1.0")
-    print()
+    print
+    print "Compute AIQ from log file results, version 1.0"
+    print
 
     sys.argv.pop(0)
 
@@ -125,8 +125,8 @@ def main():
     for file_name in sys.argv:
         file = open( file_name, 'r')
         estimate( file, detailed )
-        print(":" + basename(file_name))
-        if detailed: print()
+        print ":" + basename(file_name)
+        if detailed: print
         file.close()
     
 

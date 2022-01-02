@@ -20,7 +20,7 @@ class ReferenceMachine:
 
     # used for naming log files etc.
     def __str__( self ):
-        print("You need to override ReferenceMachine.__str__")
+        print "You need to override ReferenceMachine.__str__"
 
     def getNumObs( self ):
         return self.num_obs
@@ -39,10 +39,10 @@ class ReferenceMachine:
 
     # reset environment and return initial state and reward
     def reset( self, program="" ):
-        print("You need to override ReferenceMachine.reset!")
+        print "You need to override ReferenceMachine.reset!"
 
     # Perform this action in the current state.  Return the reward and new state.
     def act( self, action ):
-        print("You need to override ReferenceMachine.act!")
+        print "You need to override ReferenceMachine.act!"
 
         

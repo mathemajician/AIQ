@@ -6,7 +6,7 @@
 # Released under GNU GPLv3
 #
 
-from .Agent import Agent
+from Agent import Agent
 
 from numpy import zeros
 from numpy import ones
@@ -14,7 +14,7 @@ from numpy import ones
 import  numpy as np
 
 
-from .random import randint, randrange, random
+from random import randint, randrange, random
 
 
 class Freq(Agent):
